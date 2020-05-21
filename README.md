@@ -1,20 +1,75 @@
-# Adidas Product View Component
-This repo contains react components that mimic the product view component on www.adidas.com
+## Server API
 
-## Looping Slideshow Carousel
-![Sample Product Component](/db/data/main.gif)
+### Get products info
+  * GET `/api/products/:id`
 
-## Accessible and Scalable
-![Sample Product Component](/db/data/responsive.gif)
+**Path Parameters:**
+  * `id` products id
 
-## Interactive User Experience
-![Sample Product Component](/db/data/order.gif)
+**Success Status Code:** `200`
 
-## Modern UI
-![Sample Product Component](/db/data/magnifying.gif)
+**Returns:** JSON
 
-## Getting Started
-```sh
-docker-compose up
+```json
+    {
+      "id": "String",
+      "name": "String",
+      "colletion_name": "String",
+      "review_count": "Number",
+      "review_average": "Number",
+      "colors": "Array"
+    }
 ```
+
+### Add color to products
+  * POST `/api/products/:productsId/colors`
+
+**Path Parameters:**
+
+  * `productsId` products id
+
+**Success Status Code:** `201`
+
+**Request Body**: Expects JSON with the following keys.
+
+```json
+    {
+      "color_id": "id Number",
+      "product_id": "id String",
+      "url": "color URL",
+      "name": "String",
+      "list_price": "Number",
+      "sale_price": "Number",
+      "inventory": "Array"
+    }
+```
+
+
+### Update products info
+  * PUT `/api/products/:id`
+
+**Path Parameters:**
+  * `id` products id
+
+**Success Status Code:** `204`
+
+**Request Body**: Expects JSON with any of the following keys (include only keys to be updated)
+
+```json
+    {
+      "name": "String",
+      "collection_name": "String",
+      "review_count": "Number",
+      "review_average": "Number",
+      "colors": "Array"
+    }
+```
+
+### Delete products
+  * DELETE `/api/products/:id`
+
+**Path Parameters:**
+  * `id` products id
+
+**Success Status Code:** `204`
 
