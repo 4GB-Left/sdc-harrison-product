@@ -8,7 +8,7 @@ fs.readFile('../db/data.json', 'utf8', (err, data) => {
   } else {
     let results = JSON.parse(data);
     let copy = JSON.parse(data);
-    for (var i = 0; i <= 9999; i++) {
+    for (var i = 0; i < 10000; i++) {
       results = results.concat(copy);
     }
     let shoes = results;
@@ -18,6 +18,7 @@ fs.readFile('../db/data.json', 'utf8', (err, data) => {
     let inventoryCollection = [];
     shoes.forEach((shoe, shoeInd) => {
       shoe.product_id = shoeInd;
+      shoe.product_name = shoe.name
       shoe.adidas_id = shoe.id;
       shoe.colors.forEach((color, colorInd)=>{
         color.product_id = shoeInd;
@@ -40,6 +41,7 @@ fs.readFile('../db/data.json', 'utf8', (err, data) => {
     });
     shoeCollection.map((row) => {
       delete row.id;
+      delete row.name;
       delete row.colors;
     })
     colorCollection.map((row) => {
@@ -52,9 +54,12 @@ fs.readFile('../db/data.json', 'utf8', (err, data) => {
     // console.log(imgCollection);
     // console.log(inventoryCollection);
     writer.pipe(fs.createWriteStream('shoes.csv'));
+    let counter = 0;
     for (var i = 0; i <= shoeCollection.length- 1; i++) {
       writer.write(shoeCollection[i])
+      counter++;
     }
+    console.log('inserted', counter, 'items')
     writer.end;
     // fs.writeFile('shoes.csv', JSON.stringify(shoeCollection), (err) => {
     //   console.log(err);
