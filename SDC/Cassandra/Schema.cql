@@ -5,7 +5,7 @@ CREATE KEYSPACE adidas
   };
 
 CREATE TABLE IF NOT EXISTS products {
-  product_id text,
+  product_id number,
   product_name text,
   collection_name text,
   product_review_count number,
@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS products {
 }
 
 CREATE TABLE IF NOT EXISTS colors {
-  product_id text,
-  color_id text,
+  product_id number,
+  color_id number,
   color_name text,
   color_url text,
   color_list_price number,
@@ -24,16 +24,16 @@ CREATE TABLE IF NOT EXISTS colors {
 }
 
 CREATE TABLE IF NOT EXISTS inventory {
-  product_id text,
-  color_id text,
+  product_id number,
+  color_id number,
   size text,
   quantity number,
   PRIMARY KEY (product_id)
 }
 
 CREATE TABLE IF NOT EXISTS photos {
-  product_id text,
-  color_id text,
+  product_id number,
+  color_id number,
   photos set,
   PRIMARY KEY (product_id)
 };

@@ -4,18 +4,17 @@ const data = require('./data.js');
 // console.log(data);
 let results = Array.from(data);
 let copy = data;
-for (var x = 1; x < 50000; x++) {
+for (var x = 1; x < 50001; x++) {
   results.push(...copy);
 }
 console.log(results.length);
 
-let photoStream = fs.createWriteStream('./SerialData/bigPhotos.csv');
+let photoStream = fs.createWriteStream('../Data/bigPhotos.csv');
 photoStream.write('product_id,color_id,photo_url\n');
 
 const writeAllphotos = (writer, encoding, callback) => {
       let i = 0;
-      let colorKey = -1;
-      let photoKey = -1;
+      let colorKey = 0;
       const write = () => {
         let ok = true;
         do {
@@ -24,8 +23,7 @@ const writeAllphotos = (writer, encoding, callback) => {
             let color = colors[j];
             colorKey++;
             for (var u = 0; u <= color.images.length - 1; u++) {
-              photoKey++;
-              let row = `${i},${colorKey},${color.images[u]}\n`;
+              let row = `${i+1},${colorKey},${color.images[u]}\n`;
               if (i === results.length -1) {
                 writer.write(row, encoding, callback);
               } else {

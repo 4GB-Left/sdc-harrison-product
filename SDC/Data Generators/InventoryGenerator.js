@@ -4,18 +4,17 @@ const data = require('./data.js');
 // console.log(data);
 let results = Array.from(data);
 let copy = data;
-for (var x = 1; x < 50000; x++) {
+for (var x = 1; x < 50001; x++) {
   results.push(...copy);
 }
 console.log(results.length);
 
-let inventoryStream = fs.createWriteStream('./SerialData/bigInventory.csv');
+let inventoryStream = fs.createWriteStream('../Data/bigInventory.csv');
 inventoryStream.write('product_id,color_id,size,quantity\n');
 
 const writeAllphotos = (writer, encoding, callback) => {
       let i = 0;
-      let colorKey = -1;
-      let invKey = -1;
+      let colorKey = 0;
       const write = () => {
         let ok = true;
         do {
@@ -24,8 +23,7 @@ const writeAllphotos = (writer, encoding, callback) => {
             colorKey++;
             let color = colors[j];
             for (var u = 0; u <= color.inventory.length - 1; u++) {
-              invKey++;
-              let row = `${i},${colorKey},${color.inventory[u].size},${color.inventory[u].quantity}\n`;
+              let row = `${i+1},${colorKey},${color.inventory[u].size},${color.inventory[u].quantity}\n`;
               if (i === results.length -1) {
                 writer.write(row, encoding, callback);
               } else {

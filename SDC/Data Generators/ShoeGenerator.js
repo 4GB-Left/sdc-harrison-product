@@ -4,12 +4,12 @@ const data = require('./data.js');
 // console.log(data);
 let results = Array.from(data);
 let copy = data;
-for (var x = 1; x < 50000; x++) {
+for (var x = 1; x < 50001; x++) {
   results.push(...copy);
 }
 console.log(results.length);
 
-let shoeStream = fs.createWriteStream('./SerialData/bigShoes.csv', {flags:'a', encoding:'utf-8'});
+let shoeStream = fs.createWriteStream('../Data/bigShoes.csv', {flags:'a', encoding:'utf-8'});
 shoeStream.write('adidas_id,product_name,collection_name,review_count,review_average\n')
 
 const writeAllShoes = (writer, encoding, callback) => {
