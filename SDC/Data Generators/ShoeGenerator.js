@@ -9,8 +9,8 @@ for (var x = 1; x < 50001; x++) {
 }
 console.log(results.length);
 
-let shoeStream = fs.createWriteStream('../Data/bigShoes.csv', {flags:'a', encoding:'utf-8'});
-shoeStream.write('adidas_id,product_name,collection_name,review_count,review_average\n')
+let shoeStream = fs.createWriteStream('../Data/CassandraShoes.csv', {flags:'a', encoding:'utf-8'});
+shoeStream.write('product_id,adidas_id,product_name,collection_name,review_count,review_average\n')
 
 const writeAllShoes = (writer, encoding, callback) => {
       let i = 0;
@@ -18,7 +18,7 @@ const writeAllShoes = (writer, encoding, callback) => {
         let ok = true;
         do {
           let shoe = results[i];
-          let row = `${shoe.id},${shoe.name},${shoe.collection_name}, ${shoe.review_count},${shoe.review_average}\n`;
+          let row = `${i+1},${shoe.id},${shoe.name},${shoe.collection_name}, ${shoe.review_count},${shoe.review_average}\n`;
           if (i === results.length -1) {
             writer.write(row, encoding, callback);
           } else {

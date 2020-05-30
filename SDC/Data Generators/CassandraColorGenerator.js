@@ -9,8 +9,8 @@ for (var x = 1; x < 50001; x++) {
 }
 console.log(results.length);
 
-let colorStream = fs.createWriteStream('../Data/bigColors.csv');
-colorStream.write('product_id, color_id ,color_name,color_url,list_price,sale_price\n');
+let colorStream = fs.createWriteStream('../Data/CassandraColors.csv');
+colorStream.write('product_id|color_id|color_name|color_url|list_price|sale_price|photos\n');
 
 //--max-old-space-size=4096
 
@@ -24,7 +24,7 @@ const writeAllColors = (writer, encoding, callback) => {
           for (var j = 0; j<= colors.length - 1; j++) {
             colorId++;
             let color = colors[j];
-            let row = `${i+1},${colorId},${color.name},${color.url}, ${color.list_price},${color.sale_price}\n`;
+            let row = `${i+1}|${colorId}|${color.name}|${color.url}| ${color.list_price}|${color.sale_price}|[${color.images}]\n`;
             if (i === results.length -1) {
               writer.write(row, encoding, callback);
             } else {

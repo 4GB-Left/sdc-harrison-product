@@ -10,11 +10,12 @@ for (var x = 1; x < 50001; x++) {
 console.log(results.length);
 
 let photoStream = fs.createWriteStream('../Data/bigPhotos.csv');
-photoStream.write('product_id,color_id,photo_url\n');
+photoStream.write('photo_id, product_id,color_id,photo_url\n');
 
 const writeAllphotos = (writer, encoding, callback) => {
       let i = 0;
       let colorKey = 0;
+      let photoKey = 0;
       const write = () => {
         let ok = true;
         do {
@@ -23,6 +24,7 @@ const writeAllphotos = (writer, encoding, callback) => {
             let color = colors[j];
             colorKey++;
             for (var u = 0; u <= color.images.length - 1; u++) {
+              photoKey++;
               let row = `${i+1},${colorKey},${color.images[u]}\n`;
               if (i === results.length -1) {
                 writer.write(row, encoding, callback);

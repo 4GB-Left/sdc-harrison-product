@@ -4,138 +4,92 @@ const port = 4500;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
+const cassandra = require('../Cassandra/db');
+
 const postgres = require('../PostgreSQL/db');
+const _ = require('lodash');
 
 app.use(cors());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}))
-
-app.get('/', (req, res) => {
-  console.log('k');
-  res.send('k');
-})
-
+app.use(bodyParser.urlencoded({ extended: true }))
 
 app.get('/api/products/', (req, res) => {
-  //use postgres to get product
-  console.log("YAYY");
-  postgres.joinMadness(req.query.product_id, (err, result) => {
+  cassandra.getProduct(req.query.product_id, (err, result) => {
     if (err) {
-      res.status(400).send(err);
+      res.status(404).send(err);
     } else {
-      let rows = result;
-      let colors = {};
-      let inventories = {};
-      let seenColors = [];
-      let product = {
-        id: rows[0].id,
-        adidas_id: rows[0].adidas_id,
-        name: rows[0].name,
-        collection_name: rows[0].collection_name,
-        review_count: rows[0].review_count,
-        review_average: rows[0].review_average,
-        colors: []
-      }
-      colorInd = 0;
-      for (var x = 0; x <= rows.length -1 ; x++) {
-        let color = {
-          id: rows[x].color_id,
-          url: rows[x].color_url,
-          name: rows[x].color_name,
-          inventory: [],
-          photos: []
-        }
-        if (!colors[color.id]) {
-          colors[color.id] = color;
-          colors[color.id].colorInd = colorInd;
-          product.colors.push(color);
-          console.log(color);
-          seenColors.push(color.id);
-        }
-        let colorIndex = Number(rows[x].photo_url.split('_')[1].slice(5));
-        if (!product.colors[colorIndex].photos.includes(rows[x].photo_url)) {
-            product.colors[colorIndex].photos.push(rows[x].photo_url);
-        }
-        if (!inventories[rows[x].inventory_id]) {
-          inventories[rows[x].inventory_id] = {
-            size: rows[x].size,
-            quantity: rows[x].quantity
-          }
-          colors[color.id].inventory.push(inventories[rows[x].inventory_id]);
-        }
-      }
-      res.status(200).send(product);
+      res.status(200).send(result);
     }
     res.end();
   })
 
-
-
-  // postgres.getSingleProduct(req.query.product_id, (err_prod, productList) => {
-  //   if (err_prod) {
-  //     res.status(400).send(err_prod);
-  //   } else {
-  //     let product = productList[0];
-  //     let shoe = {
-  //       id: product.id,
-  //       adidas_id: product.adidas_id,
-  //       name: product.product_name,
-  //       collection_name: product.collection_name,
-  //       review_count: product.review_count,
-  //       review_average: product.review_average,
-  //       colors: []
-  //     };
-  //     postgres.getColorsByProduct(shoe.id, (err_col, colorList) => {
-  //       if (err_col) {
-  //         res.status(400).send(err_col);
-  //       } else {
-  //         for (var x = 0 ; x <= colorList.length - 1; x++) {
-  //           let aColor = colorList[x];
-  //           let color = {
-  //             id: aColor.id,
-  //             url: aColor.color_url,
-  //             name: aColor.color_name,
-  //             list_price: aColor.list_price,
-  //             sale_price: aColor.sale_price,
-  //             inventory: [],
-  //             photos: [],
-  //           }
-  //           postgres.getInventoryByProduct(colorList[x].product_id, (err_inv, inventoryList) => {
-  //             if (err_inv) {
-  //               res.status(400).send(err_inv);
-  //             } else {
-  //               for (var j = 0; j <= inventoryList.length - 1; j++) {
-  //                 let anInventory = inventoryList[j];
-  //                 let inventory = {
-  //                   size: anInventory.size,
-  //                   quantity: anInventory.quantity
-  //                 }
-  //                 aColor.inventory.push(inventory);
-  //               }
-  //             }
-  //           })
-  //           postgres.getPhotosByProduct(colorList[x].product_id, (err_photo, photoList) => {
-  //             if (err_photo) {
-  //               res.status(400).send(err_photo);
-  //             }
-  //             for (var y = 0; y = photoList.length - 1; y++) {
-  //               let aPhoto = photoList[y];
-  //               color.photos.push(aPhoto.photo_url)
-  //             }
-  //           })
-  //           shoe.colors.push(color);
-  //         }
-  //       }
-  //     })
-  //     res.status(200).send(shoe);
-  //   }
-  //   res.end();
-  // })
-
-
 })
+
+app.patch('/api/products/', (req, res) => {
+  const options = {
+    quantity: req.query.quantity,
+    product_id: req.query.product_id,
+    color_id: req.query.color_id,
+    size: req.query.size
+  }
+  cassandra.updateInventoryQuantity(options, (err, result) => {
+    if (err) {
+      res.status(400).send(err)
+    } else {
+      res.status(202).send(result);
+    }
+  })
+})
+
 app.use(express.static(__dirname + '/'));
-app.listen(port,() => {
+app.listen(port, () => {
   console.log('listening on port: ', port);
 })
+
+
+/* OLD POSTGRES QUERY
+
+postgres.getProduct(req.query.product_id, (err, result) => {
+    if (err) {
+      res.status(400).send(err)
+    } else {
+      // console.log(result.rows);
+      let results = result.rows;
+      if (results.length > 0) {
+        let shoe = {
+          product_id: results[0].product_id,
+          id: results[0].adidas_id,
+          name: results[0].product_name,
+          collection_name: results[0].collection_name,
+          review_count: results[0].review_count,
+          review_average: results[0].review_average,
+          colors:[]
+        }
+        for (var x = 0; x <= results.length - 1; x++) {
+          let aColor = results[x];
+          let color = {
+            id: aColor.color_id,
+            url: aColor.color_url,
+            name: aColor.color_name,
+            list_price: aColor.list_price,
+            sale_price: aColor.sale_price,
+            inventory: [],
+            photos: aColor.photos
+          }
+          let inv = _.zip(results[x].inventory_ids, results[x].sizes, results[x].quantities);
+          inv = inv.map((el) => {
+            return {id: el[0], size: el[1], quantity: el[2]};
+          })
+          color.inventory.push(...inv);
+          shoe.colors.push(color);
+        }
+        res.status(200).send(shoe);
+      } else {
+        res.status(200);
+      }
+    }
+    res.end();
+  })
+
+*/
