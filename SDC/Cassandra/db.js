@@ -1,3 +1,4 @@
+require('newrelic');
 const cassandra = require('cassandra-driver');
 
 const client = new cassandra.Client({
@@ -9,6 +10,39 @@ const client = new cassandra.Client({
 client.connect();
 
 module.exports = {
+  getColors: (product_id, callback) =>{
+    const prodParams = [product_id];
+    const colorQuery = 'SELECT * FROM colors WHERE product_id = ?';
+    client.execute(colorQuery, prodParams, {prepare:true})
+      .then((result) => {
+        callback(null, result.rows);
+      })
+      .catch((err) => {
+        callback(err);
+      })
+  },
+  getAProduct: (product_id, callback) => {
+    const productQuery = 'SELECT * FROM products WHERE product_id = ?';
+    const prodParams = [product_id];
+    client.execute(productQuery, prodParams, {prepare:true})
+      .then((result) => {
+        callback(null, result.rows)
+      })
+      .catch((err) => {
+        callback(err);
+      })
+  },
+  getInventory: (product_id, color_id, callback) => {
+    const inventoryQuery = 'SELECT * FROM inventory WHERE product_id = ? AND color_id = ?'
+    const prodParams = [product_id, color_id];
+    client.execute(inventoryQuery, prodParams, {prepare:true})
+      .then((result) => {
+        callback(null, result.rows)
+      })
+      .catch((err) => {
+        callback(err);
+      })
+  },
 
   getProduct: async (product_id, callback) => {
     const productQuery = 'SELECT * FROM products WHERE product_id = ?';
@@ -17,7 +51,6 @@ module.exports = {
     const inventoryQuery = 'SELECT * FROM inventory WHERE product_id = ? AND color_id = ?'
     let Shoes = await client.execute(productQuery, prodParams, {prepare: true})
     if (Shoes.rows[0]) {
-      console.log(Shoes.rows)
       const product = Shoes.rows[0];
       let Shoe = {
         product_id: product.product_id,
@@ -32,7 +65,7 @@ module.exports = {
         .then(async (result) => {
           const colors = result.rows;
           for (var x = 0; x <= colors.length - 1; x++) {
-            let aColor = {
+            let color = {
               id: colors[x].color_id,
               url: colors[x].color_url,
               name: colors[x].color_name,
@@ -42,8 +75,8 @@ module.exports = {
             let colorParams = [prodParams[0]];
             colorParams.push(colors[x].color_id);
             let Inventories = await client.execute(inventoryQuery,  colorParams, {prepare: true})
-            aColor.inventory = Inventories.rows;
-            Shoe.colors.push(aColor);
+            color.inventory = Inventories.rows;
+            Shoe.colors.push(color);
           }
           callback(null, Shoe);
         })
@@ -55,6 +88,10 @@ module.exports = {
       callback(null);
     }
   },
+
+  // getProduct: (product_id, callback) => {
+
+  // },
 
   updateInventoryQuantity: (opts, callback) => {
     const updateQuery = 'UPDATE inventory SET quantity = ? WHERE product_id = ? AND color_id = ? AND size = ?';
