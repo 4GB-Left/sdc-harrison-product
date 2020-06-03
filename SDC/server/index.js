@@ -1,21 +1,22 @@
+require('newrelic');
 const express = require('express');
 const app = express();
 const port = 4500;
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const morgan = require('morgan');
+// const morgan = require('morgan');
 const cassandra = require('../Cassandra/db');
-
-const postgres = require('../PostgreSQL/db');
-const _ = require('lodash');
+const compression = require('compression');
+let path = require('path');
 
 app.use(cors());
-app.use(morgan('dev'));
+// app.use(morgan('tiny'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(compression());
 
-app.get('/api/products/', (req, res) => {
-  cassandra.getProduct(req.query.product_id, (err, result) => {
+app.get('/api/product/:product_id', async (req, res) => {
+  await cassandra.getAProduct(req.params.product_id, (err, result) => {
     if (err) {
       res.status(404).send(err);
     } else {
@@ -23,8 +24,39 @@ app.get('/api/products/', (req, res) => {
     }
     res.end();
   })
-
 })
+
+app.get('/api/products/:product_id', async (req, res) => {
+  await cassandra.getAProduct(req.params.product_id, (err, result) => {
+    if (err) {
+      res.status(404).send(err);
+    } else {
+      res.status(200).send(result);
+    }
+    res.end();
+  })
+}),
+app.get('/api/products/:product_id/colors/', (req, res) => {
+  cassandra.getColors(req.params.product_id, (err, result) => {
+    if (err) {
+      res.status(404).send(err);
+    } else {
+      res.status(200).send(result);
+    }
+    res.end();
+  })
+})
+app.get('/api/products/:product_id/colors/:color_id/inventory', (req, res) => {
+  cassandra.getInventory(req.params.product_id, req.params.color_id, (err, result) => {
+    if (err) {
+      res.status(404).send(err);
+    } else {
+      res.status(200).send(result);
+    }
+    res.end();
+  })
+})
+
 
 app.patch('/api/products/', (req, res) => {
   const options = {
@@ -42,10 +74,22 @@ app.patch('/api/products/', (req, res) => {
   })
 })
 
-app.use(express.static(__dirname + '/'));
+app.use(express.static(path.join(__dirname, '/../../client/dist/')));
 app.listen(port, () => {
   console.log('listening on port: ', port);
 })
+// app.listen(4501, () => {
+//   console.log('listening on port: ', 4501);
+// })
+// app.listen(4502, () => {
+//   console.log('listening on port: ', 4502);
+// })
+// app.listen(4503, () => {
+//   console.log('listening on port: ', 4503);
+// })
+// app.listen(4504, () => {
+//   console.log('listening on port: ', 4504);
+// })
 
 
 /* OLD POSTGRES QUERY
